@@ -1,10 +1,12 @@
-import { SceneRoot } from "./render/SceneRoot";
+"use client";
+
+import { CompassMode } from "./modes/CompassMode";
 import { Reticle } from "./ui/Reticle";
 
 export default function Page() {
   return (
     <>
-      <SceneRoot />
+      <CompassMode />
       <Reticle />
     </>
   );
