@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { createStarField } from "./StarField";
 import { createWorldHorizon } from "../layers/HorizonLayer";
 import { useTouchLook } from "../core/useTouchLook";
+import { createEarthEquator } from "../layers/EarthEquatorLayer";
 
 export function SceneRoot() {
   const { yaw, pitch } = useTouchLook();
@@ -26,6 +27,7 @@ export function SceneRoot() {
 
     scene.add(createStarField());
     scene.add(createWorldHorizon());
+    scene.add(createEarthEquator());
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
