@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import * as THREE from "three";
 import { createStarField } from "./StarField";
 import { createWorldHorizon } from "../layers/HorizonLayer";
-import { useLookDirection } from "../core/useLookDirection";
+import { useTouchLook } from "../core/useTouchLook";
 
 export function SceneRoot() {
-  const lookDir = useLookDirection();
+  const { yaw, pitch } = useTouchLook();
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -24,12 +24,8 @@ export function SceneRoot() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // ⭐ зорі
     scene.add(createStarField());
-
-    // 🔵 СВІТОВИЙ ГОРИЗОНТ
-    const horizon = createWorldHorizon();
-    scene.add(horizon);
+    scene.add(createWorldHorizon());
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -41,9 +37,16 @@ export function SceneRoot() {
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // 👁️ дивимось у напрямку погляду
-      camera.lookAt(lookDir.current);
+      const y = yaw.current;
+      const p = pitch.current;
 
+      const dir = new THREE.Vector3(
+        Math.sin(y) * Math.cos(p),
+        Math.sin(p),
+        -Math.cos(y) * Math.cos(p)
+      );
+
+      camera.lookAt(dir);
       renderer.render(scene, camera);
     };
 
@@ -54,7 +57,7 @@ export function SceneRoot() {
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
     };
-  }, [lookDir]);
+  }, [yaw, pitch]);
 
   return null;
 }

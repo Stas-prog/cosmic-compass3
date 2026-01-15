@@ -13,22 +13,21 @@ export function createGreatCircle(
   const u = new THREE.Vector3().crossVectors(n, ref).normalize();
   const v = new THREE.Vector3().crossVectors(n, u).normalize();
 
-  const points: THREE.Vector3[] = [];
+  const pts: THREE.Vector3[] = [];
   for (let i = 0; i <= segments; i++) {
     const t = (i / segments) * Math.PI * 2;
-    points.push(
+    pts.push(
       new THREE.Vector3()
         .addScaledVector(u, Math.cos(t) * radius)
         .addScaledVector(v, Math.sin(t) * radius)
     );
   }
 
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineBasicMaterial({
+  const g = new THREE.BufferGeometry().setFromPoints(pts);
+  const m = new THREE.LineBasicMaterial({
     color: 0x44aaff,
     transparent: true,
     opacity: 0.8,
   });
-
-  return new THREE.Line(geometry, material);
+  return new THREE.Line(g, m);
 }
