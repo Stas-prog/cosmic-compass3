@@ -33,10 +33,32 @@ export function SceneRoot({
     const animate = () => {
       requestAnimationFrame(animate);
 
-      if (gyro.current) {
-        camera.quaternion.copy(gyro.current);
-        cameraQuatRef.current.copy(camera.quaternion);
-      }
+     if (gyro.current) {
+  const q = gyro.current.clone();
+
+  const euler = new THREE.Euler().setFromQuaternion(q, "YXZ");
+
+  const yaw = euler.y;    // ліво/право
+  const pitch = euler.x;  // вгору/вниз
+
+  // ОБМЕЖУЄМО pitch, щоб не було полюсів
+  const maxPitch = Math.PI / 2 - 0.01;
+  const clampedPitch = Math.max(
+    -maxPitch,
+    Math.min(maxPitch, pitch)
+  );
+
+  // напрям погляду по сфері
+  const direction = new THREE.Vector3(
+    Math.sin(yaw) * Math.cos(clampedPitch),
+    Math.sin(clampedPitch),
+    Math.cos(yaw) * Math.cos(clampedPitch)
+  );
+
+  camera.lookAt(direction);
+  cameraQuatRef.current.copy(camera.quaternion);
+}
+
 
       renderer.render(scene, camera);
     };

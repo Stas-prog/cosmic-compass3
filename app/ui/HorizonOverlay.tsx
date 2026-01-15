@@ -9,6 +9,7 @@ export function HorizonOverlay({
   cameraQuaternion: THREE.Quaternion;
 }) {
   const [angle, setAngle] = useState(0);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     const worldUp = new THREE.Vector3(0, 1, 0);
@@ -19,9 +20,14 @@ export function HorizonOverlay({
       .applyQuaternion(cameraQuaternion.clone().invert());
 
     // проєкція на екран (XY)
-    const a = Math.atan2(camUp.x, camUp.y);
+    const angle = Math.atan2(camUp.x, camUp.y);
 
-    setAngle(a);
+// вертикальне зміщення (pitch)
+const verticalOffset = camUp.z * 50; // px, можна підкрутити
+
+setAngle(angle);
+setOffset(verticalOffset);
+
   }, [cameraQuaternion]);
 
   return (
