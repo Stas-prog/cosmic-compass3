@@ -9,9 +9,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "15.0.0",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "next": "15.0.3",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
     "three": "^0.160.0"
   },
   "devDependencies": {
