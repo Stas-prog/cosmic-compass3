@@ -47,9 +47,13 @@ export function SceneRoot() {
       requestAnimationFrame(animate);
 
       // 🔄 застосовуємо гіроскоп до КАМЕРИ
-      if (gyro.current) {
-        camera.quaternion.copy(gyro.current);
-      }
+     if (gyro.current) {
+  camera.quaternion.copy(gyro.current);
+
+  // 🔑 КОМПЕНСАЦІЯ ДЛЯ ГОРИЗОНТУ
+  horizon.quaternion.copy(camera.quaternion).invert();
+}
+
 
       renderer.render(scene, camera);
     };
