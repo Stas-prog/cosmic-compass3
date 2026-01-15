@@ -31,20 +31,21 @@ setOffset(verticalOffset);
   }, [cameraQuaternion]);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        width: "120vw",
-        height: "2px",
-        background: "rgba(80,170,255,0.9)",
-        transform: `
-          translate(-50%, -50%)
-          rotate(${angle}rad)
-        `,
-        pointerEvents: "none",
-      }}
-    />
-  );
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      width: "120vw",
+      height: "2px",
+      background: "rgba(80,170,255,0.9)",
+      transform: `
+        translate(-50%, calc(-50% + ${offset}px))
+        rotate(${angle}rad)
+      `,
+      pointerEvents: "none",
+    }}
+  />
+);
+
 }

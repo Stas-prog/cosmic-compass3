@@ -1,4 +1,6 @@
-transform: `
-  translate(-50%, calc(-50% + ${offset}px))
-  rotate(${angle}rad)
-`
+html, body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  overflow: hidden;
+}
