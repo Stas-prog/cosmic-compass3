@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export function createGreatCircle(
+export default function createGreatCircle(
   normal: THREE.Vector3,
   radius: number,
   segments = 256
