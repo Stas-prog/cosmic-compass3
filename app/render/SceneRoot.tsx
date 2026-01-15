@@ -5,8 +5,11 @@ import * as THREE from "three";
 import { createStarField } from "./StarField";
 import { createDefaultObserver } from "../core/Observer";
 import { createHorizon } from "../layers/HorizonLayer";
+import { useGyroscope } from "../core/useGyroscope";
 
 export function SceneRoot() {
+  const gyro = useGyroscope();
+
   useEffect(() => {
     const scene = new THREE.Scene();
 
@@ -29,22 +32,36 @@ export function SceneRoot() {
     // 👁️ спостерігач
     const observer = createDefaultObserver();
 
-    // 🔵 горизонт
+    // 🔵 горизонт (об’єктивний)
     const horizon = createHorizon(observer.up);
     scene.add(horizon);
 
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", onResize);
+
     const animate = () => {
       requestAnimationFrame(animate);
+
+      // 🔄 застосовуємо гіроскоп до КАМЕРИ
+      if (gyro.current) {
+        camera.quaternion.copy(gyro.current);
+      }
+
       renderer.render(scene, camera);
     };
 
     animate();
 
     return () => {
+      window.removeEventListener("resize", onResize);
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [gyro]);
 
   return null;
 }
