@@ -3,11 +3,13 @@
 import { useEffect } from "react";
 import * as THREE from "three";
 import { createStarField } from "./StarField";
-import { createDefaultObserver } from "../core/Observer";
-import { createHorizon } from "../layers/HorizonLayer";
 import { useGyroscope } from "../core/useGyroscope";
 
-export function SceneRoot() {
+export function SceneRoot({
+  cameraQuatRef,
+}: {
+  cameraQuatRef: React.MutableRefObject<THREE.Quaternion>;
+}) {
   const gyro = useGyroscope();
 
   useEffect(() => {
@@ -25,46 +27,16 @@ export function SceneRoot() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // ⭐ зоряне небо
     const stars = createStarField();
     scene.add(stars);
-
-    // 👁️ спостерігач
-    const observer = createDefaultObserver();
-
-    // 🔵 горизонт (об’єктивний)
-    const horizon = createHorizon(observer.up);
-    scene.add(horizon);
-
-    const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener("resize", onResize);
 
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // 🔄 застосовуємо гіроскоп до КАМЕРИ
-     if (gyro.current) {
-  // 1. беремо орієнтацію з гіроскопа
-const q = gyro.current.clone();
-
-// 2. переводимо в Euler
-const e = new THREE.Euler().setFromQuaternion(q, "YXZ");
-
-// 3. ОБНУЛЯЄМО roll (Z)
-e.z = 0;
-
-// 4. назад у quaternion
-camera.quaternion.setFromEuler(e);
-
-// 5. горизонт компенсуємо
-horizon.quaternion.copy(camera.quaternion).invert();
-
-}
-
+      if (gyro.current) {
+        camera.quaternion.copy(gyro.current);
+        cameraQuatRef.current.copy(camera.quaternion);
+      }
 
       renderer.render(scene, camera);
     };
@@ -72,11 +44,10 @@ horizon.quaternion.copy(camera.quaternion).invert();
     animate();
 
     return () => {
-      window.removeEventListener("resize", onResize);
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
     };
-  }, [gyro]);
+  }, [gyro, cameraQuatRef]);
 
   return null;
 }
