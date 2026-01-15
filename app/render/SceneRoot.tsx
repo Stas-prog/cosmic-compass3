@@ -48,10 +48,21 @@ export function SceneRoot() {
 
       // 🔄 застосовуємо гіроскоп до КАМЕРИ
      if (gyro.current) {
-  camera.quaternion.copy(gyro.current);
+  // 1. беремо орієнтацію з гіроскопа
+const q = gyro.current.clone();
 
-  // 🔑 КОМПЕНСАЦІЯ ДЛЯ ГОРИЗОНТУ
-  horizon.quaternion.copy(camera.quaternion).invert();
+// 2. переводимо в Euler
+const e = new THREE.Euler().setFromQuaternion(q, "YXZ");
+
+// 3. ОБНУЛЯЄМО roll (Z)
+e.z = 0;
+
+// 4. назад у quaternion
+camera.quaternion.setFromEuler(e);
+
+// 5. горизонт компенсуємо
+horizon.quaternion.copy(camera.quaternion).invert();
+
 }
 
 
