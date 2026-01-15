@@ -1,6 +1,10 @@
 import { Vector3 } from "three";
 
-export interface Observer {
-  position: Vector3; // від центру Землі
-  up: Vector3;       // локальний зеніт
+export function createDefaultObserver() {
+  // Спостерігач на поверхні Землі (умовно)
+  const up = new Vector3(0, 1, 0);
+
+  return {
+    up
+  };
 }

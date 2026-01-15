@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import * as THREE from "three";
 import { createStarField } from "./StarField";
+import { createDefaultObserver } from "../core/Observer";
+import { createHorizon } from "../layers/HorizonLayer";
 
 export function SceneRoot() {
   useEffect(() => {
@@ -14,7 +16,6 @@ export function SceneRoot() {
       0.1,
       10000
     );
-
     camera.position.set(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -24,6 +25,13 @@ export function SceneRoot() {
     // ⭐ зоряне небо
     const stars = createStarField();
     scene.add(stars);
+
+    // 👁️ спостерігач
+    const observer = createDefaultObserver();
+
+    // 🔵 горизонт
+    const horizon = createHorizon(observer.up);
+    scene.add(horizon);
 
     const animate = () => {
       requestAnimationFrame(animate);

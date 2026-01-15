@@ -1,9 +1,7 @@
-import { Vector3 } from "three";
-import { GreatCircle } from "../primitives/GreatCircle";
-import { Observer } from "../core/Observer";
+import * as THREE from "three";
+import { createGreatCircle } from "../primitives/GreatCircle";
 
-export function createHorizon(observer: Observer): GreatCircle {
-  return {
-    normal: observer.up.clone().normalize()
-  };
+export function createHorizon(up: THREE.Vector3) {
+  // Горизонт = площина ⟂ Up
+  return createGreatCircle(up, 1000);
 }
