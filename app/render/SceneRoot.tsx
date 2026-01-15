@@ -3,14 +3,11 @@
 import { useEffect } from "react";
 import * as THREE from "three";
 import { createStarField } from "./StarField";
-import { useGyroscope } from "../core/useGyroscope";
+import { createWorldHorizon } from "../layers/HorizonLayer";
+import { useLookDirection } from "../core/useLookDirection";
 
-export function SceneRoot({
-  cameraQuatRef,
-}: {
-  cameraQuatRef: React.MutableRefObject<THREE.Quaternion>;
-}) {
-  const gyro = useGyroscope();
+export function SceneRoot() {
+  const lookDir = useLookDirection();
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -27,38 +24,25 @@ export function SceneRoot({
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const stars = createStarField();
-    scene.add(stars);
+    // ⭐ зорі
+    scene.add(createStarField());
+
+    // 🔵 СВІТОВИЙ ГОРИЗОНТ
+    const horizon = createWorldHorizon();
+    scene.add(horizon);
+
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", onResize);
 
     const animate = () => {
       requestAnimationFrame(animate);
 
-     if (gyro.current) {
-  const q = gyro.current.clone();
-
-  const euler = new THREE.Euler().setFromQuaternion(q, "YXZ");
-
-  const yaw = euler.y;    // ліво/право
-  const pitch = euler.x;  // вгору/вниз
-
-  // ОБМЕЖУЄМО pitch, щоб не було полюсів
-  const maxPitch = Math.PI / 2 - 0.01;
-  const clampedPitch = Math.max(
-    -maxPitch,
-    Math.min(maxPitch, pitch)
-  );
-
-  // напрям погляду по сфері
-  const direction = new THREE.Vector3(
-    Math.sin(yaw) * Math.cos(clampedPitch),
-    Math.sin(clampedPitch),
-    Math.cos(yaw) * Math.cos(clampedPitch)
-  );
-
-  camera.lookAt(direction);
-  cameraQuatRef.current.copy(camera.quaternion);
-}
-
+      // 👁️ дивимось у напрямку погляду
+      camera.lookAt(lookDir.current);
 
       renderer.render(scene, camera);
     };
@@ -66,10 +50,11 @@ export function SceneRoot({
     animate();
 
     return () => {
+      window.removeEventListener("resize", onResize);
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
     };
-  }, [gyro, cameraQuatRef]);
+  }, [lookDir]);
 
   return null;
 }
