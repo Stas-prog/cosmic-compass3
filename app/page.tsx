@@ -17,7 +17,7 @@ export default function Page() {
     <>
       <CompassMode />
       <Reticle />
-      <HorizonOverlay pitch={pitch} roll={roll} enabled={true} />
+      <HorizonOverlay pitch={pitch} roll={roll} enabled={false} />
     </>
   );
 }
