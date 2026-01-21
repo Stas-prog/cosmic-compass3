@@ -22,14 +22,14 @@ export default function CompassMode() {
     const LAT = 50.45; // приклад
     const LON = 34.52; // приклад
 
+    // 🍀 напрям Сонця у світі
+    const sunDir = getSunDirection(LAT, LON, new Date());
+
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // напрям Сонця у світі
-      const sunDir = getSunDirection(LAT, LON, new Date());
-
       // ставимо Сонце на сферу
-    //   sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+      sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
 
       // камера: людський базис (90° зсув)
       const y = yaw.current;
