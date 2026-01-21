@@ -39,7 +39,7 @@ const { yaw, pitch, calibrateNorth, getYawFromNorth } = useRealCompass();
     const q = new THREE.Quaternion();
     q.setFromEuler(
       new THREE.Euler(
-        p,
+        -p,
         y,
         0,
         "YXZ"
