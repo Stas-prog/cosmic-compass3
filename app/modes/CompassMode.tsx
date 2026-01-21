@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import * as THREE from "three";
 import { useRealCompass } from "../core/useRealCompass";
-import { createWorldHorizon } from "../render/createWorldHorizon";
+// import { createWorldHorizon } from "../render/createWorldHorizon";
 
 export default function CompassMode() {
   const { yaw, pitch } = useRealCompass();
@@ -21,8 +21,8 @@ export default function CompassMode() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const horizon = createWorldHorizon();
-    scene.add(horizon);
+    // const horizon = createWorldHorizon();
+    // scene.add(horizon);
 
     const animate = () => {
       requestAnimationFrame(animate);

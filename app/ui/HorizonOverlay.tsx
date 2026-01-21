@@ -1,51 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export function HorizonOverlay({
-  cameraQuaternion,
-}: {
-  cameraQuaternion: THREE.Quaternion;
-}) {
-  const [angle, setAngle] = useState(0);
-  const [offset, setOffset] = useState(0);
+type Props = {
+  pitch: React.MutableRefObject<number>;
+  roll: React.MutableRefObject<number>;
+  enabled?: boolean; // можна вимикати
+};
+
+export default function HorizonOverlay({
+  pitch,
+  roll,
+  enabled = true,
+}: Props) {
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const worldUp = new THREE.Vector3(0, 1, 0);
+    if (!enabled) return;
 
-    // переносимо Up у простір камери
-    const camUp = worldUp
-      .clone()
-      .applyQuaternion(cameraQuaternion.clone().invert());
+    let raf = 0;
 
-    // проєкція на екран (XY)
-    const angle = Math.atan2(camUp.x, camUp.y);
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      if (!ref.current) return;
 
-// вертикальне зміщення (pitch)
-const verticalOffset = camUp.z * 50; // px, можна підкрутити
+      // тілесна зона появи горизонту
+      const MIN_PITCH = THREE.MathUtils.degToRad(30);
+      const FADE_RANGE = THREE.MathUtils.degToRad(20);
 
-setAngle(angle);
-setOffset(verticalOffset);
+      const p = Math.abs(pitch.current);
+      let opacity = 0;
 
-  }, [cameraQuaternion]);
+      if (p > MIN_PITCH) {
+        opacity = Math.min(1, (p - MIN_PITCH) / FADE_RANGE);
+      }
+
+      // вертикальний зсув (менше землі, більше неба)
+      const OFFSET_PX = 80; // підкручуй за смаком
+      const y = Math.min(OFFSET_PX, opacity * OFFSET_PX);
+
+      ref.current.style.opacity = String(opacity);
+      ref.current.style.transform = `
+        translate(-50%, ${y}px)
+        rotate(${-roll.current}rad)
+      `;
+    };
+
+    animate();
+    return () => cancelAnimationFrame(raf);
+  }, [pitch, roll, enabled]);
+
+  if (!enabled) return null;
 
   return (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      width: "120vw",
-      height: "2px",
-      background: "rgba(80,170,255,0.9)",
-      transform: `
-        translate(-50%, calc(-50% + ${offset}px))
-        rotate(${angle}rad)
-      `,
-      pointerEvents: "none",
-    }}
-  />
-);
-
+    <div
+      ref={ref}
+      style={{
+        position: "fixed",
+        left: "50%",
+        top: "50%",
+        width: "140%",
+        height: "2px",
+        background: "rgba(80,160,255,0.7)",
+        transformOrigin: "center center",
+        pointerEvents: "none",
+        opacity: 0,
+        zIndex: 10,
+      }}
+    />
+  );
 }
