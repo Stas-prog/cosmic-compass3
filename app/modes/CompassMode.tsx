@@ -31,15 +31,21 @@ export default function CompassMode() {
       // ставимо Сонце на сферу
       sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
 
-      // камера: людський базис (90° зсув)
-      const y = yaw.current;
-      const p = pitch.current - Math.PI / 2;
-      const dir = new THREE.Vector3(
-        Math.sin(y) * Math.cos(p),
-        Math.sin(p),
-        -Math.cos(y) * Math.cos(p)
-      );
-      camera.lookAt(dir);
+   
+    const q = new THREE.Quaternion();
+
+    // yaw (навколо Y), pitch (навколо X), roll = 0
+        q.setFromEuler(
+          new THREE.Euler(
+           pitch.current,
+           yaw.current,
+           0,
+            "YXZ"
+  )
+);
+
+camera.quaternion.copy(q);
+
 
       renderer.render(scene, camera);
     };
