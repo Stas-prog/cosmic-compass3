@@ -18,9 +18,9 @@ export default function CompassMode() {
     const { group: sunGroup, distance } = createSunMarker();
     scene.add(sunGroup);
 
-    // ⚙️ координати (тимчасово задай свої)
+    // ⚙️ координати 
     const LAT = 50.45; // приклад
-    const LON = 30.52; // приклад
+    const LON = 34.52; // приклад
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -29,7 +29,7 @@ export default function CompassMode() {
       const sunDir = getSunDirection(LAT, LON, new Date());
 
       // ставимо Сонце на сферу
-      sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+    //   sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
 
       // камера: людський базис (90° зсув)
       const y = yaw.current;

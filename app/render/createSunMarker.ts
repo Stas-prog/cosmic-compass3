@@ -20,13 +20,13 @@ export function createSunMarker(distance = 1200) {
   group.add(sun);
 
   // helper: лінія напряму (опційно)
-  const lineGeo = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(0, 0, -distance),
-  ]);
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffcc33, opacity: 0.4, transparent: true });
-  const line = new THREE.Line(lineGeo, lineMat);
-  group.add(line);
+//   const lineGeo = new THREE.BufferGeometry().setFromPoints([
+//     new THREE.Vector3(0, 0, 0),
+//     new THREE.Vector3(0, 0, -distance),
+//   ]);
+//   const lineMat = new THREE.LineBasicMaterial({ color: 0xffcc33, opacity: 0.4, transparent: true });
+//   const line = new THREE.Line(lineMat);
+//   group.add(line);
 
   return { group, distance };
 }
