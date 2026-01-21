@@ -29,7 +29,7 @@ export default function CompassMode() {
       requestAnimationFrame(animate);
 
       // ставимо Сонце на сферу
-      sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+    //   sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
 
    
     const q = new THREE.Quaternion();
@@ -44,7 +44,13 @@ export default function CompassMode() {
   )
 );
 
-camera.quaternion.copy(q);
+    camera.quaternion.copy(q);
+
+    // СОНЦЕ В КООРДИНАТАХ КАМЕРИ
+    const sunInCamera = sunDir.clone().applyQuaternion(camera.quaternion.clone().invert());
+
+    sunGroup.position.copy(sunInCamera.multiplyScalar(distance));
+
 
 
       renderer.render(scene, camera);
