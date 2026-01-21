@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 export function useRealCompass() {
   const yaw = useRef(0);
   const pitch = useRef(0);
   const roll = useRef(0);
+
+  // 🔑 ЯКІР ПІВНОЧІ
+  const northOffset = useRef<number | null>(null);
 
   useEffect(() => {
     const onOrientation = (e: DeviceOrientationEvent) => {
@@ -21,5 +24,22 @@ export function useRealCompass() {
     return () => window.removeEventListener("deviceorientation", onOrientation);
   }, []);
 
-  return { yaw, pitch, roll };
+  // 🧭 ФУНКЦІЯ ФІКСАЦІЇ ПІВНОЧІ
+  const calibrateNorth = () => {
+    northOffset.current = yaw.current;
+  };
+
+  // 🧭 ВИРІВНЯНИЙ YAW (ВІД ПІВНОЧІ)
+  const getYawFromNorth = () => {
+    if (northOffset.current === null) return yaw.current;
+    return yaw.current - northOffset.current;
+  };
+
+  return {
+    yaw,
+    pitch,
+    roll,
+    calibrateNorth,
+    getYawFromNorth,
+  };
 }

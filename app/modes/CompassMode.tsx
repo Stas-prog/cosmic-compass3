@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { useRealCompass } from "../core/useRealCompass";
 import { getSunDirection } from "../core/useSunDirection";
 import { createSunMarker } from "../render/createSunMarker";
+import NorthButton from "../ui/NorthButton";
+
 
 export default function CompassMode() {
-  const { yaw, pitch } = useRealCompass();
+const { yaw, pitch, calibrateNorth, getYawFromNorth } = useRealCompass();
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -29,27 +31,28 @@ export default function CompassMode() {
       requestAnimationFrame(animate);
 
       // ставимо Сонце на сферу
-    //   sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+      sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
 
    
+    const y = getYawFromNorth(); // 🔑 ВІД ПІВНОЧІ
+    const p = pitch.current;
     const q = new THREE.Quaternion();
-
-    // yaw (навколо Y), pitch (навколо X), roll = 0
-        q.setFromEuler(
-          new THREE.Euler(
-           pitch.current,
-           yaw.current,
-           0,
-            "YXZ"
-  )
+    q.setFromEuler(
+      new THREE.Euler(
+        p,
+        y,
+        0,
+        "YXZ"
+      )
 );
 
     camera.quaternion.copy(q);
 
-    // СОНЦЕ В КООРДИНАТАХ КАМЕРИ
-    const sunInCamera = sunDir.clone().applyQuaternion(camera.quaternion.clone().invert());
 
-    sunGroup.position.copy(sunInCamera.multiplyScalar(distance));
+    // СОНЦЕ В КООРДИНАТАХ КАМЕРИ
+    // const sunInCamera = sunDir.clone().applyQuaternion(camera.quaternion.clone().invert());
+
+    // sunGroup.position.copy(sunInCamera.multiplyScalar(distance));
 
 
 
@@ -61,8 +64,12 @@ export default function CompassMode() {
     return () => {
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
+      
     };
   }, [yaw, pitch]);
 
-  return null;
+  return <>
+  <NorthButton onCalibrate={calibrateNorth} />
+</>
+;
 }
