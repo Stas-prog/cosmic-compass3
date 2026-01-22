@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useRealCompass } from "../core/useRealCompass";
 import { getSunDirection } from "../core/useSunDirection";
 import { createSunMarker } from "../render/createSunMarker";
+import { createStarField } from "../render/StarField";
 import NorthButton from "../ui/NorthButton";
 
 
@@ -25,13 +26,24 @@ const { yaw, pitch, calibrateNorth, getYawFromNorth } = useRealCompass();
     const LON = 34.52; // приклад
 
     // 🍀 напрям Сонця у світі
-    const sunDir = getSunDirection(LAT, LON, new Date());
+    let sunDir = getSunDirection(LAT, LON, new Date());
+
+    // 🌌 ЗОРЯНЕ НЕБО
+    const stars = createStarField();
+    scene.add(stars);
+
+
+    setInterval(() => {
+    sunDir = getSunDirection(LAT, LON, new Date());}, 60000); // раз на хвилину
+
 
     const animate = () => {
       requestAnimationFrame(animate);
 
       // ставимо Сонце на сферу
-      sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+    sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
+    stars.position.copy(camera.position);
+
 
    
     const y = getYawFromNorth(); // 🔑 ВІД ПІВНОЧІ
