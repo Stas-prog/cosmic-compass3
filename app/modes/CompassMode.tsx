@@ -1,94 +1,101 @@
+"use client";
+
 import * as THREE from "three";
 import { useEffect } from "react";
-import { useRealCompass } from "../core/useRealCompass";
+import { DeviceControls } from "../core/DeviceControls";
 import { getSunDirection } from "../core/useSunDirection";
 import { createSunMarker } from "../render/createSunMarker";
 import { createStarField } from "../render/StarField";
 import NorthButton from "../ui/NorthButton";
 
-
 export default function CompassMode() {
-const { yaw, pitch, calibrateNorth, getYawFromNorth } = useRealCompass();
-
   useEffect(() => {
+    // 🌌 СЦЕНА
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 4000);
+
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      5000
+    );
+
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(innerWidth, innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // ☀️ Сонце
-    const { group: sunGroup, distance } = createSunMarker();
-    scene.add(sunGroup);
+    // 📱 КОНТРОЛЕР ПРИСТРОЮ (ФІЗИЧНИЙ БАЗИС)
+    const controls = new DeviceControls();
 
-    // ⚙️ координати 
-    const LAT = 50.45; // приклад
-    const LON = 34.52; // приклад
-
-    // 🍀 напрям Сонця у світі
-    let sunDir = getSunDirection(LAT, LON, new Date());
-
-    // 🌌 ЗОРЯНЕ НЕБО
-    const stars = createStarField();
+    // 🌟 ЗОРЯНЕ НЕБО
+    const stars = createStarField(4000, 3500);
     scene.add(stars);
 
+    // ☀️ СОНЦЕ
+    const { group: sunGroup, distance } = createSunMarker(1500);
+    scene.add(sunGroup);
 
-    setInterval(() => {
-    sunDir = getSunDirection(LAT, LON, new Date());}, 60000); // раз на хвилину
+    // ⚙️ КООРДИНАТИ СПОСТЕРІГАЧА
+    const LAT = 50.45; // змінюй на свої
+    const LON = 34.52; // змінюй на свої
 
+    // ☀️ НАПРЯМ СОНЦЯ У СВІТІ
+    let sunDir = getSunDirection(LAT, LON, new Date());
 
+    // 🔄 ОНОВЛЕННЯ СОНЦЯ РАЗ НА ХВИЛИНУ
+    const sunTimer = setInterval(() => {
+      sunDir = getSunDirection(LAT, LON, new Date());
+    }, 60000);
+
+    // 🧭 ПІВНІЧ (ЯКІР)
+    let northOffset: THREE.Quaternion | null = null;
+
+    const calibrateNorth = () => {
+      northOffset = controls.getQuaternion().clone();
+    };
+
+    // 🎞 АНІМАЦІЯ
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // ставимо Сонце на сферу
-    sunGroup.position.copy(sunDir.clone().multiplyScalar(distance));
-    stars.position.copy(camera.position);
+      // 📱 орієнтація пристрою
+      const q = controls.getQuaternion();
 
+      // 🧭 застосування Півночі
+      if (northOffset) {
+        q.premultiply(northOffset.clone().invert());
+      }
 
-   
-    const y = getYawFromNorth(); // 🔑 ВІД ПІВНОЧІ
-    const p = pitch.current;
-    const q = new THREE.Quaternion();
-    q.setFromEuler(
-      new THREE.Euler(
-        -p,
-        y,
-        0,
-        "YXZ"
-      )
-  );
+      camera.quaternion.copy(q);
 
-    // 🔑 ЗСУВ БАЗИСУ НА 90°
-    // бо камера Three.js дивиться в -Z
-    const base = new THREE.Quaternion();
-    base.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+      // 🌌 зірки "далекі"
+      stars.position.copy(camera.position);
 
-    q.premultiply(base);
-
-    camera.quaternion.copy(q);
-
-
-    // СОНЦЕ В КООРДИНАТАХ КАМЕРИ
-    // const sunInCamera = sunDir.clone().applyQuaternion(camera.quaternion.clone().invert());
-
-    // sunGroup.position.copy(sunInCamera.multiplyScalar(distance));
-
-
+      // ☀️ Сонце у світі
+      sunGroup.position.copy(
+        sunDir.clone().multiplyScalar(distance)
+      );
 
       renderer.render(scene, camera);
     };
 
     animate();
 
+    // 🧹 CLEANUP
     return () => {
+      clearInterval(sunTimer);
+      controls.dispose();
       renderer.dispose();
       document.body.removeChild(renderer.domElement);
-      
     };
-  }, [yaw, pitch]);
+  }, []);
 
-  return <>
-  <NorthButton onCalibrate={calibrateNorth} />
-</>
-;
+  return (
+    <>
+      <NorthButton onCalibrate={() => {
+        const event = new CustomEvent("calibrate-north");
+        window.dispatchEvent(event);
+      }} />
+    </>
+  );
 }
