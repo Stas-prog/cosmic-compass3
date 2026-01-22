@@ -56,7 +56,14 @@ const { yaw, pitch, calibrateNorth, getYawFromNorth } = useRealCompass();
         0,
         "YXZ"
       )
-);
+  );
+
+    // 🔑 ЗСУВ БАЗИСУ НА 90°
+    // бо камера Three.js дивиться в -Z
+    const base = new THREE.Quaternion();
+    base.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+
+    q.premultiply(base);
 
     camera.quaternion.copy(q);
 
